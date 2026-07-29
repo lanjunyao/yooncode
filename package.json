@@ -1,0 +1,27 @@
+{
+  "name": "codex-pulse",
+  "version": "0.10.1",
+  "description": "YoonCode desktop Codex companion, system monitor, and screenshot shelf",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "love.yooncode.companion",
+    "productName": "YoonCode",
+    "npmRebuild": false,
+    "electronDist": "node_modules/electron/dist",
+    "asar": true,
+    "asarUnpack": ["src/ocr.ps1"],
+    "files": ["src/**/*", "package.json"],
+    "win": { "target": "portable", "artifactName": "YoonCode-${version}.exe" }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^37.2.3",
+    "electron-builder": "^26.0.12"
+  }
+}

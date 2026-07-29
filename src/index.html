@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' file: data:; script-src 'self'; style-src 'self' 'unsafe-inline'" />
+  <title>YoonCode</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="app" class="app-shell compact">
+    <div class="peek-strip" aria-hidden="true"><i id="peekQuotaBar"></i></div>
+    <section class="compact-bar">
+      <div class="avatar-column">
+        <button id="avatarBtn" class="avatar-wrap" title="点击查看详情并和允儿互动">
+          <img id="avatarSprite" src="assets/yoona-expressions.png" alt="林允儿状态表情" />
+          <span class="avatar-sparkle">✦</span>
+        </button>
+        <span class="weekly-label">周剩余 <b id="quotaBadge">--</b></span>
+      </div>
+
+      <div class="compact-main">
+        <div class="compact-top">
+          <div class="model-block">
+            <div class="model-line"><span class="brand-mark">YOONCODE</span><span id="liveDot" class="live-dot"></span><strong id="codexName">Codex</strong><span id="username" class="user-pill">--</span><span id="syncText">连接中</span><button id="settingsBtn" class="help-btn settings-btn" title="显示设置">Aa</button><button id="helpBtn" class="help-btn" title="使用手册">?</button></div>
+            <div id="sessionTitle" class="session-title">当前活跃对话 · 正在读取…</div>
+          </div>
+          <div class="window-actions">
+            <button id="minBtn" class="icon-btn" title="最小化">−</button>
+            <button id="closeBtn" class="icon-btn" title="关闭">×</button>
+          </div>
+        </div>
+
+        <div id="companionLine" class="companion-line"><span>允儿</span><p id="companionMessage">我正在帮你守着 Codex 和电脑状态呀。</p></div>
+
+        <div class="quick-stats">
+          <div><span>本轮输出</span><strong id="outputCompact">0</strong><em>token</em></div>
+          <div><span>本轮消耗</span><strong id="lastTokens">0</strong><em>token</em></div>
+          <div><span>当前上下文</span><strong id="contextCompact">--</strong></div>
+          <div><span>累计 Token</span><strong id="totalCompact">0</strong></div>
+          <div><span>额度重置</span><strong id="resetAt">--</strong></div>
+        </div>
+        <div class="compact-progress"><i id="quotaBar"></i></div>
+      </div>
+    </section>
+
+    <section class="expanded-content">
+      <nav class="memory-tabs" aria-label="YoonCode 功能导航">
+        <button class="memory-tab active" data-tab="overview"><span>◈</span> 总览</button>
+        <button class="memory-tab" data-tab="memory"><span>◇</span> 记忆舱</button>
+        <button class="memory-tab" data-tab="screenshots"><span>▣</span> 截图库</button>
+        <button class="memory-tab" data-tab="replay"><span>◷</span> 工作录像</button>
+        <button class="memory-tab" data-tab="agents"><span>⌘</span> AI 团队</button>
+        <button class="memory-tab" data-tab="companion"><span>♡</span> 陪伴</button>
+      </nav>
+      <section id="tab-overview" class="memory-tab-panel active">
+      <section class="next-top-grid">
+        <article class="next-card handoff-card">
+          <div class="next-card-head"><strong>一键续聊包</strong><span>核心升级</span></div>
+          <h2 id="handoffContext">当前上下文 --</h2>
+          <p>自动提取目标、完成事项、相关文件和下一步，先预览编辑，再复制到新对话。</p>
+          <div class="handoff-progress"><i id="handoffProgress"></i></div>
+          <div class="handoff-stats"><span id="handoffGoals">目标 --</span><span id="handoffDone">完成 --</span><span id="handoffFiles">文件 --</span><span id="handoffPending">待办 --</span></div>
+          <button id="generateHandoffBtn" class="next-primary">生成续聊包</button>
+        </article>
+        <article class="next-card forecast-card">
+          <div class="next-card-head"><strong>额度消耗预测</strong><span class="green">动态估算</span></div>
+          <div id="forecastValue" class="forecast-value">积累样本中</div>
+          <p id="forecastReason">根据周剩余变化和工作时间计算</p>
+          <div class="forecast-rows"><div><span>最近速度</span><b id="forecastRate">--</b></div><div><span>预计耗尽</span><b id="forecastAt">--</b></div><div><span>预测可信度</span><b id="forecastConfidence">--</b></div></div>
+        </article>
+        <article class="next-card weekly-card">
+          <div class="next-card-head"><strong>周额度</strong><span>7 天窗口</span></div>
+          <div id="weeklyRing" class="weekly-ring"><b id="weeklyRingValue">--</b></div>
+          <p id="weeklyStatus">等待 Codex 限额数据</p>
+          <div class="forecast-rows"><div><span>已用</span><b id="weeklyUsed">--</b></div><div><span>重置时间</span><b id="weeklyReset">--</b></div></div>
+        </article>
+      </section>
+      <div class="section-heading"><span>数据分层</span><small>四类数据独立统计，避免混淆</small></div>
+      <section class="data-grid">
+        <article class="data-card quota-card"><span>套餐额度</span><strong id="quotaDetail">--</strong><p>来源：Codex rate_limits</p></article>
+        <article class="data-card context-card"><span>当前上下文</span><strong id="contextDetail">--</strong><p>来源：最近请求 input_tokens</p></article>
+        <article class="data-card turn-card"><span>本轮消耗</span><strong id="turnDetail">0</strong><p>来源：last_token_usage</p></article>
+        <article class="data-card total-card"><span>累计 Token</span><strong id="totalTokens">0</strong><p>来源：所有当前及归档会话汇总</p></article>
+      </section>
+
+      <section class="trend-card">
+        <div class="section-heading"><span>对话上下文与历史趋势</span><small>点击对话可查看并生成续聊包</small></div>
+        <div class="context-workbench">
+          <div class="session-watch">
+            <div class="session-watch-head"><strong>需要关注的对话</strong><span id="sessionRiskCount">0 个预警</span></div>
+            <div id="sessionList" class="session-list"><div class="session-empty">正在读取最近对话…</div></div>
+          </div>
+          <div class="selected-trend">
+            <div class="selected-session-head"><div><strong id="selectedSessionTitle">当前活跃对话</strong><small id="selectedSessionHint">上下文状态读取中</small></div><button id="selectedHandoffBtn">生成该对话续聊包</button></div>
+            <div class="trend-line"><div id="trendSummary" class="trend-summary"><span>当前 --</span><span>峰值 --</span><span>安全区 &lt; 65%</span></div><small id="trendCaption">最近 0 轮</small></div>
+            <div class="chart-wrap"><canvas id="trendCanvas"></canvas><div class="threshold threshold-80">80% 压缩预警</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="system-section">
+        <div class="section-heading"><span>电脑状态</span><small id="systemUpdated">实时刷新</small></div>
+        <div class="system-grid">
+          <article class="system-card cpu"><div><span>CPU</span><strong id="cpuValue">0%</strong></div><div class="system-bar"><i id="cpuBar"></i></div><canvas id="cpuCanvas"></canvas></article>
+          <article class="system-card memory"><div><span>内存</span><strong id="memoryValue">0%</strong></div><div class="system-bar"><i id="memoryBar"></i></div><small id="memoryText">-- / --</small></article>
+          <article class="system-card disks"><div><span>磁盘</span><small>各分区占用</small></div><div id="diskList" class="disk-list"></div></article>
+        </div>
+      </section>
+
+      <div class="overview-shot-strip"><div><strong>最近截图</strong><small>完整管理与标注已移到“截图库”</small></div><div id="overviewShots" class="overview-shots"></div><button id="overviewOpenShots">查看全部 →</button></div>
+      </section>
+
+      <section id="tab-screenshots" class="memory-tab-panel screenshots-panel">
+      <section class="gallery-section">
+        <div class="section-heading">
+          <div><span>截图集合</span><small id="shotCount">0 张 · 右键删除</small></div>
+          <button id="folderBtn" class="text-btn">打开文件夹 ↗</button>
+        </div>
+        <div class="smart-shot-toolbar">
+          <div class="shot-search-wrap"><span>⌕</span><input id="shotSearch" type="search" placeholder="搜索截图文字、报错、代码或标签…"></div>
+          <span id="ocrBadge" class="ocr-badge">OCR 本地识别</span>
+        </div>
+        <div id="gallery" class="gallery"><div class="empty">还没有截图，留住第一个灵感瞬间吧</div></div>
+      </section>
+
+      <footer>
+        <div class="capture-actions">
+          <button id="regionBtn" class="capture-btn primary"><span>⌗</span> 局部截图 <kbd>Ctrl Alt S</kbd></button>
+          <button id="captureBtn" class="capture-btn secondary">全屏截图 <kbd>Ctrl Alt F</kbd></button>
+        </div>
+        <div id="dataSource" class="source">数据源：等待连接</div>
+      </footer>
+      </section>
+
+      <section id="tab-memory" class="memory-tab-panel memory-page">
+        <div class="page-intro"><div><span>CONTEXT RESCUE</span><h2>AI 对话记忆舱</h2><p>从本机 Codex 会话持续读取目标、上下文、相关文件和最近进展，选择一个对话即可生成可编辑续聊包。</p></div><b id="memoryRiskBadge">0 个对话需要关注</b></div>
+        <div class="memory-layout">
+          <article class="memory-session-card"><div class="memory-section-head"><strong>最近对话</strong><small>按风险和更新时间排序</small></div><div id="memorySessionList" class="memory-session-list"></div></article>
+          <article class="memory-capsule-card"><div class="memory-capsule-head"><div><span>所选记忆舱</span><h3 id="memorySelectedTitle">等待选择对话</h3></div><b id="memoryReadyState">正在读取</b></div><div class="memory-meter"><div><span>上下文占用</span><strong id="memoryContextValue">--</strong></div><i><b id="memoryContextBar"></b></i><p id="memoryRiskText">正在分析该对话是否需要迁移。</p></div><div class="memory-chips"><span id="memoryGoalChip">目标 --</span><span id="memoryDecisionChip">进展 --</span><span id="memoryFileChip">文件 --</span><span id="memoryTodoChip">待办 --</span></div><button id="memoryGenerateBtn" class="memory-primary">生成并预览续聊包</button><small class="local-note">所有提取与整理默认在本机完成</small></article>
+        </div>
+        <article class="project-cockpit"><div><span>PROJECT COCKPIT</span><h3>项目现场快捷恢复</h3><p>重新打开当前工作目录、截图库和对应记忆舱，继续上一次工作。</p></div><div class="cockpit-stat"><span>工作目录</span><b id="cockpitWorkspace">等待识别</b></div><div class="cockpit-stat"><span>相关对话</span><b id="cockpitSessions">0 个</b></div><div class="cockpit-actions"><button id="cockpitOpenWorkspace">打开目录</button><button id="cockpitOpenShots">打开截图</button></div></article>
+      </section>
+
+      <section id="tab-replay" class="memory-tab-panel replay-page">
+        <div class="replay-grid">
+          <article class="bug-capsule-card"><div class="memory-section-head"><div><span>PANIC BUTTON</span><strong>刚刚出错了</strong></div><b>故障胶囊</b></div><div class="bug-hotkey"><kbd>Ctrl</kbd><i>+</i><kbd>Alt</kbd><i>+</i><kbd>B</kbd></div><h3>一键打包刚才的故障现场</h3><p>自动截取当前画面，并整理活跃对话、最近工作事件、系统状态和 Git 工作区摘要。</p><div class="bug-items"><span>最近画面</span><span>对话上下文</span><span>Git 状态</span><span>系统环境</span></div><button id="generateBugBtn" class="bug-primary">生成故障胶囊</button></article>
+          <article class="work-replay-card"><div class="memory-section-head"><div><span>WORK REPLAY</span><strong>今天的 AI 工作录像</strong></div><small>来自本机会话事件</small></div><div id="replayList" class="replay-list"><div class="session-empty">正在整理最近工作事件…</div></div></article>
+        </div>
+        <article class="collaboration-card"><div><span>今日协作摘要</span><h3 id="shareHeadline">今天也在稳稳推进</h3><p>自动生成适合保存或分享的脱敏摘要。</p></div><div class="share-stats"><div><span>最近对话</span><b id="shareSessionCount">0</b></div><div><span>预警对话</span><b id="shareRiskCount">0</b></div><div><span>累计 Token</span><b id="shareTokenCount">0</b></div></div><button id="copyShareBtn">复制协作摘要</button></article>
+      </section>
+
+      <section id="tab-agents" class="memory-tab-panel agents-page">
+        <div class="page-intro"><div><span>AGENT RADAR</span><h2>AI 团队雷达</h2><p>根据最近 Codex 会话事件显示活跃、待命与需要关注的任务；状态为本机事件推断，不冒充 Codex 官方运行状态。</p></div><b id="agentCountBadge">0 个最近任务</b></div>
+        <div id="agentsList" class="agents-radar-list"></div>
+        <article class="agent-explainer"><strong>状态口径</strong><div><span class="agent-dot live"></span>2 分钟内有新事件：活跃</div><div><span class="agent-dot waiting"></span>15 分钟内有事件：待命</div><div><span class="agent-dot risk"></span>上下文超过 65%：需要关注</div></article>
+      </section>
+
+      <section id="tab-companion" class="memory-tab-panel companion-page">
+        <div class="companion-hero"><div><span>YOUR DAY, REMEMBERED</span><h2>陪伴中心</h2><p>YoonCode 不统计你有多忙。它只是替你记住：今天的每一步，都没有白走。</p></div><div class="letter-schedule"><label>下班来信 <input id="letterTime" type="time" value="18:30"></label><label class="switch-label"><input id="autoLetter" type="checkbox" checked><i></i>自动生成</label><button id="finishTodayBtn">今天先到这里</button></div></div>
+        <section class="companion-grid">
+          <article class="daily-letter-card"><div class="letter-card-head"><div><span>DAILY LETTER</span><h3 id="letterTitle">今天还没有来信</h3></div><b id="letterRole">YoonCode</b></div><p id="letterGreeting" class="letter-greeting">当一天的工作告一段落，我会替你整理完成的事和明天的第一步。</p><div id="letterAchievements" class="letter-achievements"><div class="letter-empty">点击“今天先到这里”，收下今天的第一封工作来信。</div></div><div class="letter-tomorrow"><span>明天从这里继续</span><p id="letterTomorrow">等待今天的工作记忆</p></div><blockquote id="letterClosing">你只管创造，剩下的记忆、守护与陪伴，交给我。</blockquote><small id="letterSource">所有内容默认在本机整理</small><div class="letter-actions"><button id="copyLetterBtn">复制来信</button><button id="letterToCardBtn">生成协作卡片</button><button id="regenerateLetterBtn">重新整理</button></div></article>
+          <article class="letter-stats-card"><div class="memory-section-head"><div><span>TODAY</span><strong>今天留下的足迹</strong></div><small>数据口径透明可查</small></div><div class="letter-stats"><div><span>完成线索</span><b id="letterAchievementCount">0</b></div><div><span>连续协作</span><b id="letterStreak">0 天</b></div><div><span>守住对话</span><b id="letterProtected">0</b></div><div><span>少重复解释</span><b id="letterSaved">0 次</b></div><div><span>今日截图</span><b id="letterShots">0</b></div><div><span>活跃对话</span><b id="letterSessions">0</b></div></div><p class="stats-honesty">“少重复解释”只统计真正复制过的续聊包和故障胶囊；“守住对话”只统计在高上下文状态下完成过续聊迁移的对话。</p></article>
+        </section>
+        <section class="share-studio"><div class="share-controls"><div><span>SHARE THE MOMENT</span><h3>AI 协作卡片</h3><p>分享的不是消耗了多少 Token，而是今天和 AI 一起留下了什么。</p></div><div class="share-template-list"><button class="share-template active" data-template="warm">温柔来信</button><button class="share-template" data-template="dev">开发者战报</button><button class="share-template" data-template="minimal">极简成就</button></div><div class="share-privacy"><label><input id="cardShowName" type="checkbox">显示名称</label><label><input id="cardShowDetails" type="checkbox">展示详细成果</label><small>本地路径、对话原文和 Git 信息始终不进入海报</small></div><div class="share-card-actions"><button id="copyCardBtn">复制图片</button><button id="saveCardBtn">保存 PNG</button></div></div><div class="share-canvas-wrap"><canvas id="shareCanvas" width="1080" height="1350"></canvas></div></section>
+        <section class="role-center"><div class="role-center-head"><div><span>COMPANION CHARACTERS</span><h3>选择懂你的陪伴方式</h3><p>安装原创角色包，或者用五张表情和自己的文字，创造只属于你的桌面伴侣。</p></div><div><button id="importRoleBtn">安装角色包</button><button id="createRoleBtn">创建角色</button></div></div><div id="rolesList" class="roles-list"></div><div class="role-safety">角色包只能包含图片、主题色和文案，不能运行脚本、读取文件或访问网络。</div></section>
+      </section>
+    </section>
+  </main>
+
+  <div id="imageModal" class="image-modal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head"><strong id="modalName">截图预览</strong><button id="modalClose">×</button></div>
+      <div class="modal-image-wrap"><img id="modalImage" alt="截图预览"></div>
+      <div class="modal-actions">
+        <button id="favoriteImageBtn">☆ 收藏</button>
+        <button id="tagImageBtn">添加标签</button>
+        <button id="copyImageBtn">复制图片</button>
+        <button id="editImageBtn">标注编辑</button>
+        <button id="saveAsBtn">另存为</button>
+        <button id="openFolderModalBtn">打开文件夹</button>
+      </div>
+      <div id="modalToast" class="modal-toast"></div>
+    </div>
+  </div>
+  <div id="helpModal" class="image-modal help-modal" aria-hidden="true">
+    <div class="modal-card help-card">
+      <div class="modal-head manual-head"><div><strong>认识 YoonCode</strong><small>记得工作，也记得关心你</small></div><div class="manual-head-actions"><button id="manualFullscreen" type="button" aria-label="全屏阅读" title="全屏阅读">⛶</button><button id="helpClose" type="button" aria-label="关闭产品指南" title="关闭产品指南">×</button></div></div>
+      <div class="manual-content">
+        <section class="manual-hero">
+          <div class="manual-hero-copy"><span>YOUR AI DESKTOP COMPANION</span><h1>YoonCode</h1><h2>会记得你的工作，守住你的思路，也在你疲惫时给出温柔回应。</h2><p>灵感正盛时，不必担心上下文突然压缩；程序出错时，不必费力回忆刚才做过什么；一天结束时，也有人替你把成果轻轻收好。YoonCode 住在 Windows 桌面顶端，让复杂的 AI 协作重新变得安心、有序、有温度。</p><div class="manual-promise"><b>记住重要现场</b><b>守住连续思路</b><b>看见每份努力</b></div></div>
+          <div class="manual-cover"><img id="manualCoverImage" src="assets/manual-product.png" alt="YoonCode 产品界面"><div class="manual-cover-actions"><button id="manualChooseImage">自定义封面配图</button><button id="manualResetImage">恢复默认</button></div></div>
+        </section>
+        <section class="manual-pain"><div><span>“聊到关键处，才发现上下文快满了。”</span><span>“刚才那个报错，我已经说不清怎么发生的。”</span><span>“截图越来越多，真正需要时却怎么也找不到。”</span></div><strong>这些不该由你一个人记住。</strong><p>YoonCode 不试图增加更多需要学习的按钮，而是在你最容易分心、焦虑和中断的时刻，悄悄把现场接住。</p></section>
+        <section class="manual-start"><div><span>01</span><h3>一眼安心，不再反复猜测</h3><p>不用频繁翻找页面，也不用心算额度还够不够。YoonCode 把模型、额度、上下文和本轮消耗安静放在桌面顶端；你看一眼就知道今天还能走多远。鼠标在横条任意位置时她都会留下，真正离开后才轻轻收起。</p></div><div class="manual-mini-bar"><b>YOONCODE</b><i></i><strong>gpt-5.6-sol</strong><em>周剩余 51%</em><span>上下文 84%</span></div></section>
+        <section class="manual-rhythm"><div><span>A DAY WITH YOONCODE</span><h3>从打开电脑到安心下班，她用自己的方式陪你走完一天</h3></div><div class="manual-rhythm-grid"><article><b>早上 · 找回昨天</b><p>先看总览和记忆舱，不必重新翻聊天记录。昨天停在哪里、今天先做什么，都有清楚的落脚点。</p></article><article><b>专注时 · 守住思路</b><p>额度和上下文安静待在顶部。只有真正需要注意时才提醒，不打断正在发生的创造。</p></article><article><b>遇到问题 · 接住现场</b><p>截图、故障胶囊和工作录像替你保留线索。你不必因为一次报错重新讲述整个故事。</p></article><article><b>下班前 · 收好今天</b><p>一封工作来信看见完成的事，也留下明天的第一步。今天可以在这里结束，而不是一直悬在心里。</p></article></div><p class="manual-care">你不需要一直高效，也不需要把所有事情都记在脑子里。YoonCode 想做的，是让你在很忙的时候仍然保有一点从容。</p></section>
+        <section class="manual-reading"><div><span>READ AT YOUR OWN PACE</span><h3>看得舒服，比塞进更多信息更重要</h3><p>点击顶部的 <b>Aa</b>，可以在“正常、中等、偏大”三档字体之间切换。YoonCode 会记住你的选择，并同步放大横条、面板和手册；内容放不下时才自然滚动。阅读手册时点击右上角的全屏按钮，可以把功能介绍铺满整个屏幕，慢慢看，不用凑近。</p></div><div class="manual-reading-scale"><b>正常</b><b>中等</b><b>偏大</b></div></section>
+        <section class="manual-feature-grid">
+          <article><span>◇</span><div><h3>不用再从头解释</h3><p>一段对话快走到尽头时，记忆舱会帮你收好目标、进展、文件和下一步。带着续聊包开启新窗口，思路仍然接得上。</p></div></article>
+          <article><span>◷</span><div><h3>出错时有人替你回忆</h3><p>故障胶囊保留刚才的画面、对话、Git 变化和电脑状态。你不必重演事故，只需把完整现场交给 Codex。</p></div></article>
+          <article><span>▣</span><div><h3>灵感不会淹没在文件夹里</h3><p>截图自动归入一处，本地 OCR 帮你按画面文字找回来。收藏、标签和标注，让每张图都能重新成为有用的线索。</p></div></article>
+          <article><span>⌘</span><div><h3>再忙，也知道事情走到哪里</h3><p>AI 团队雷达把最近对话变成清晰的任务视图。哪些正在推进、哪些需要关注，不再靠大脑同时惦记。</p></div></article>
+          <article><span>◈</span><div><h3>数据透明，心里才有底</h3><p>额度、上下文、本轮与累计 Token 分开呈现，并注明来源。每一个提醒都有依据，而不是制造新的焦虑。</p></div></article>
+          <article><span>◎</span><div><h3>她也替你照看这台电脑</h3><p>CPU、内存与磁盘压力被翻译成直观颜色。专注工作时，不必等到电脑卡住才发现资源已经吃紧。</p></div></article>
+        </section>
+        <section class="manual-visual"><div><span>02 · SAVE THE MOMENT</span><h3>重要的不是“截了图”，而是以后还能找到当时的答案</h3><p><kbd>Ctrl Alt S</kbd> 留住局部灵感　<kbd>Ctrl Alt F</kbd> 保存完整画面　<kbd>Ctrl Alt B</kbd> 封存故障现场</p><ul><li>启动即读取，不等第一次截图后才出现</li><li>点击即可预览、复制与继续标注</li><li>OCR、搜索、标签和编辑都留在本机</li></ul></div><img src="assets/manual-screenshots.png" alt="YoonCode 截图库界面"></section>
+        <section class="manual-expression"><div class="manual-section-title"><span>03 · A COMPANION WHO CARES</span><h3>数字会让人紧张，陪伴角色把它们变成一句听得懂的关心</h3><p>额度充足时，她陪你开心推进；逐渐吃紧时，她会提醒你先做重要的事。上下文接近压缩，她先想到的不是警报，而是帮你保存结论、平稳换到新对话。点击头像，还会收到下一句温柔回应。</p></div><img id="manualExpressionStrip" src="assets/yoona-expressions.png" alt="五档状态表情长图"><div class="expression-labels"><span>放心创造</span><span>状态很好</span><span>稳稳推进</span><span>先做重要的事</span><span>别怕，我们重新开始</span></div><p class="manual-tip">你可以安装安全的 .yoonpack 原创角色包，也可以用五张表情、主题色和自己的文字创造专属角色。角色包只包含静态图片与文案，不能运行脚本、读取文件或访问网络。</p></section>
+        <section class="manual-letter"><div class="manual-letter-copy"><span>04 · LET THE DAY BE REMEMBERED</span><h3>每天结束，有一封信替你把今天收好</h3><p>YoonCode 会根据今天真实发生的对话、截图与记忆事件，写下完成了什么、守住了哪些高风险思路，以及明天从哪里继续。默认每天 18:30 生成；如果那时没有打开应用，下次启动仍会补上，不让一天的努力悄悄消失。</p><div class="manual-letter-points"><b>真实复盘<small>只统计本机实际发生的成果</small></b><b>温柔续航<small>明天从最后一件重要的事继续</small></b><b>随心设定<small>时间、角色与结尾都可以更换</small></b></div></div><img src="assets/manual-companion.png" alt="YoonCode 每日来信与陪伴中心"></section>
+        <section class="manual-share"><div><span>05 · SHARE WHAT MATTERED</span><h3>分享的不是 Token 数，而是你和 AI 一起留下了什么</h3><p>把今日成果、连续工作天数和节省的重复解释生成一张有温度的协作卡片。温柔来信、开发者战报、极简成就三种风格随心切换。</p></div><div class="manual-share-cards"><article><i>♡</i><b>默认保护隐私</b><small>路径、对话原文与 Git 信息不会进入海报</small></article><article><i>✦</i><b>一键复制或保存</b><small>适合发给团队、朋友，也适合留给未来的自己</small></article><article><i>◎</i><b>属于你的角色</b><small>海报会带上当前陪伴角色与主题色</small></article></div></section>
+        <section class="manual-data"><div><span>06 · TRUST THROUGH CLARITY</span><h3>真正的安心，来自每一个数字都说得清楚</h3><p>YoonCode 不把不同口径混成一个“看起来厉害”的大数字。你看到什么、它从哪里来，都清楚标注。</p></div><div class="manual-data-grid"><article><b>周剩余</b><strong>今天还能走多远</strong><p>来源：Codex rate_limits</p></article><article><b>当前上下文</b><strong>这段对话还能装多少</strong><p>来源：最近请求 input_tokens</p></article><article><b>本轮消耗</b><strong>刚才这一轮用了多少</strong><p>来源：last_token_usage</p></article><article><b>累计 Token</b><strong>所有协作留下的足迹</strong><p>来源：当前及归档会话汇总</p></article></div></section>
+        <section class="manual-risk"><div><span>07 · LEAVE BEFORE THE STORY BREAKS</span><h3>不是等对话忘记了再补救，而是在断片前体面地离场</h3></div><div class="risk-scale"><b>安心创作 &lt; 65%</b><b>整理 65%</b><b>准备 80%</b><b>续聊 90%</b></div><p>YoonCode 观察最近 30 轮上下文，在 65% 提醒整理，在 80% 帮你准备，在 90% 建议带着续聊包开启新对话。不是催促你结束，而是让重要的目标、决定和下一步不会因为自动压缩而失去。多个 Codex 窗口之间切换时，产生最新消息的窗口会成为当前活跃对话。</p></section>
+        <section class="manual-privacy"><b>YOUR MEMORY BELONGS TO YOU · 你的记忆，只属于你</b><p>会话指标、电脑状态、截图、OCR 索引和预测样本都在本机处理与保存。续聊包、工作录像和故障胶囊默认不调用外部 AI 服务。YoonCode 想成为值得信任的陪伴，而信任的第一步，就是不擅自拿走你的工作与记忆。</p></section>
+      </div>
+    </div>
+  </div>
+  <div id="settingsModal" class="image-modal settings-modal" aria-hidden="true">
+    <div class="modal-card settings-card"><div class="modal-head"><div><strong>显示设置</strong><small>让每一次查看都更舒服</small></div><button id="settingsClose" type="button" aria-label="关闭显示设置">×</button></div><div class="font-setting-copy"><span>字体大小</span><p>选择适合你的阅读尺寸。设置会自动保存，下次打开仍然保持。</p></div><div class="font-size-options"><button data-font-size="normal"><b>正常</b><small>紧凑显示，适合近距离使用</small></button><button data-font-size="medium"><b>中等</b><small>更轻松，推荐日常使用</small></button><button data-font-size="large"><b>偏大</b><small>减少用眼压力，信息更醒目</small></button></div><div class="settings-care">眼睛累了就把字调大一点吧。工具应该适应你，而不是让你迁就工具。</div></div>
+  </div>
+  <div id="deleteModal" class="image-modal confirm-modal" aria-hidden="true">
+    <div class="confirm-card">
+      <div class="confirm-icon">×</div>
+      <strong>删除这张截图？</strong>
+      <p id="deleteName">删除后无法从允码伴侣中恢复。</p>
+      <div class="confirm-actions"><button id="deleteCancel">再想想</button><button id="deleteConfirm">确认删除</button></div>
+    </div>
+  </div>
+  <div id="handoffModal" class="image-modal" aria-hidden="true">
+    <div class="modal-card handoff-modal-card">
+      <div class="modal-head"><div><strong>新对话续聊包</strong><small>生成后可以编辑，再复制到新对话</small></div><button id="handoffClose">×</button></div>
+      <textarea id="handoffEditor" spellcheck="false"></textarea>
+      <div class="handoff-modal-actions"><button id="regenerateHandoff">重新生成</button><button id="copyHandoffBtn">复制续聊包</button></div>
+      <div id="handoffToast" class="modal-toast"></div>
+    </div>
+  </div>
+  <div id="tagModal" class="image-modal confirm-modal" aria-hidden="true">
+    <div class="confirm-card tag-card">
+      <strong>为截图添加标签</strong><p>多个标签可以用逗号分隔</p><input id="tagInput" maxlength="300" placeholder="例如：登录流程, UI, 待处理">
+      <div class="confirm-actions"><button id="tagCancel">取消</button><button id="tagSave">保存标签</button></div>
+    </div>
+  </div>
+  <div id="bugModal" class="image-modal" aria-hidden="true">
+    <div class="modal-card handoff-modal-card bug-modal-card">
+      <div class="modal-head"><div><strong>故障胶囊已生成</strong><small>可以补充实际现象，再复制给 Codex</small></div><button id="bugClose">×</button></div>
+      <textarea id="bugEditor" spellcheck="false"></textarea>
+      <div class="bug-preview-row"><img id="bugPreview" alt="故障现场截图"><div><b id="bugSessionName">当前对话</b><span>截图、上下文、Git 状态与系统环境均来自本机</span></div></div>
+      <div class="handoff-modal-actions"><button id="regenerateBug">重新捕捉</button><button id="copyBugBtn">复制故障胶囊</button></div>
+      <div id="bugToast" class="modal-toast"></div>
+    </div>
+  </div>
+  <div id="annotationModal" class="image-modal annotation-modal" aria-hidden="true">
+    <div class="modal-card annotation-card">
+      <div class="modal-head"><div><strong>截图标注</strong><small>矩形、箭头、文字与马赛克都只在本机处理</small></div><button id="annotationClose">×</button></div>
+      <div class="annotation-toolbar">
+        <button class="annotation-tool active" data-tool="rect">□ 矩形</button>
+        <button class="annotation-tool" data-tool="arrow">↗ 箭头</button>
+        <button class="annotation-tool" data-tool="text">T 文字</button>
+        <button class="annotation-tool" data-tool="mosaic">▦ 马赛克</button>
+        <input id="annotationText" class="annotation-text" maxlength="80" placeholder="选择文字后，在这里输入内容">
+        <label>颜色 <input id="annotationColor" type="color" value="#ff5f6d"></label>
+        <button id="annotationUndo">↶ 撤销</button>
+        <button id="annotationClear">清空标注</button>
+      </div>
+      <div class="annotation-stage"><canvas id="annotationCanvas"></canvas></div>
+      <div class="annotation-actions"><span id="annotationHint">拖拽即可画矩形</span><button id="annotationSave">保存为新截图</button></div>
+    </div>
+  </div>
+  <div id="roleModal" class="image-modal role-modal" aria-hidden="true">
+    <div class="modal-card role-editor-card"><div class="modal-head"><div><strong>创建原创陪伴角色</strong><small>五档表情 · 专属颜色 · 温柔文案</small></div><button id="roleClose">×</button></div><div class="role-editor-grid"><label>角色名称<input id="roleName" maxlength="28" placeholder="例如：小码"></label><label>一句介绍<input id="roleDescription" maxlength="100" placeholder="例如：活泼、鼓励型，喜欢庆祝小进步"></label><label>主题颜色<input id="roleTheme" type="color" value="#8391ff"></label><div class="role-expression-inputs"><span>五档表情图片</span><label>充足<input class="roleImage" type="file" accept="image/png,image/jpeg,image/webp"></label><label>宽裕<input class="roleImage" type="file" accept="image/png,image/jpeg,image/webp"></label><label>适中<input class="roleImage" type="file" accept="image/png,image/jpeg,image/webp"></label><label>偏紧<input class="roleImage" type="file" accept="image/png,image/jpeg,image/webp"></label><label>用尽<input class="roleImage" type="file" accept="image/png,image/jpeg,image/webp"></label></div><label class="role-copy-field">日常关心文案<textarea id="roleGentle" placeholder="每行一句，例如：慢慢来，我会一直陪着你。"></textarea></label><label class="role-copy-field">下班来信结尾<textarea id="roleLetter" placeholder="每行一句，例如：今天辛苦啦，剩下的交给明天。"></textarea></label></div><div class="role-editor-actions"><span id="roleEditorHint">图片和文案只保存在本机</span><button id="saveRoleBtn">保存并使用角色</button></div></div>
+  </div>
+  <script src="renderer.js"></script>
+</body>
+</html>
