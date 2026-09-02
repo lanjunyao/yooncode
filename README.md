@@ -250,10 +250,6 @@ npm run pack
 
 YoonCode 是一个个人项目。如果它帮你减少了重复解释、守住了上下文，欢迎支持我继续维护。
 
-<p align="center">
-  <img src="assets/wechat-pay.png" width="240" alt="微信收款码">
-</p>
-
 感谢你的支持。
 
 ---
